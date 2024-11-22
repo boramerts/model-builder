@@ -1,13 +1,15 @@
 import React from "react";
 
-export default function CustomPicker({ text, onNumberChange }) {
+export default function CustomPicker({ text, onNumberChange, value }) {
     return (
         <div className="flex items-center w-full justify-between">
-            <span>{text}</span>
+            <span className="text-gray-700 font-medium">{text}</span>
             <input
                 type="number"
-                className="w-12 border-2 border-gray-300 rounded-md text-center"
+                value={value || ""}
+                className="w-20 border-2 border-gray-300 rounded-md text-center"
                 onChange={(e) => onNumberChange?.(e.target.value)}
+                min="1"
             />
         </div>
     );

@@ -1,0 +1,26 @@
+export const layerConfigs = {
+  CNN: {
+    parameters: [
+      { name: "filters", type: "number", label: "Filters", default: "32" },
+      { name: "kernelSize", type: "number", label: "Kernel Size", default: "3" },
+      { name: "stride", type: "number", label: "Stride", default: "1" },
+      { name: "padding", type: "select", label: "Padding", options: ["valid", "same"], default: "valid" }
+    ]
+  },
+  "Dense": {
+    parameters: [
+      { name: "units", type: "number", label: "Units", default: "64" },
+      { name: "activation", type: "select", label: "Activation", options: ["relu", "sigmoid", "tanh"], default: "relu" }
+    ]
+  },
+  "LSTM": {
+    parameters: [
+      { name: "units", type: "number", label: "Units", default: "64" },
+      { name: "returnSequences", type: "select", label: "Return Sequences", options: ["true", "false"], default: "false" },
+      { name: "activation", type: "select", label: "Activation", options: ["tanh", "relu", "sigmoid"], default: "tanh" }
+    ]
+  }
+};
+
+// Add a default layer
+export const DEFAULT_LAYER = "Dense"; 

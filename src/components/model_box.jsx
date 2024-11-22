@@ -1,28 +1,58 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import CustomPicker from "./parameter_picker";
 import LayerPicker from "./layer_picker";
+import { layerConfigs, DEFAULT_LAYER } from "../config/layer_configs";
 
-export default function ModelBox() {
-    const handleNumberChange = (value) => {
-        console.log("Selected number:", value);
+export default function ModelBox({ layerNumber }) {
+    const [selectedLayer, setSelectedLayer] = useState(DEFAULT_LAYER);
+    const [parameters, setParameters] = useState({});
+
+    useEffect(() => {
+        // Initialize parameters with defaults when layer changes
+        const newParameters = {};
+        layerConfigs[selectedLayer].parameters.forEach(param => {
+            newParameters[param.name] = param.default;
+        });
+        setParameters(newParameters);
+    }, [selectedLayer]);
+
+    const handleLayerChange = (layer) => {
+        setSelectedLayer(layer);
     };
 
-    const handleLayerChange = (selectedLayer) => {
-        console.log("Selected layer:", selectedLayer);
+    const handleParameterChange = (paramName, value) => {
+        setParameters(prev => ({
+            ...prev,
+            [paramName]: value
+        }));
     };
-
-    const layers = ["CNN", "Neural Network", "LSTM"]; // Example layers
 
     return (
         <div className="aspect-square h-full bg-white flex flex-col rounded-2xl border-2 border-gray-300 space-y-4 px-4 py-4">
             <LayerPicker
-                label="Layer 1"
-                options={layers}
+                label={`Layer ${layerNumber}`}
+                options={Object.keys(layerConfigs)}
                 onSelect={handleLayerChange}
+                value={selectedLayer}
             />
-            <CustomPicker text="Filters" onNumberChange={handleNumberChange} />
-            <CustomPicker text="Kernel Size" onNumberChange={handleNumberChange} />
-            <CustomPicker text="Stride" onNumberChange={handleNumberChange} />
+            {layerConfigs[selectedLayer].parameters.map((param) => (
+                param.type === "number" ? (
+                    <CustomPicker
+                        key={param.name}
+                        text={param.label}
+                        value={parameters[param.name]}
+                        onNumberChange={(value) => handleParameterChange(param.name, value)}
+                    />
+                ) : (
+                    <LayerPicker
+                        key={param.name}
+                        label={param.label}
+                        options={param.options}
+                        value={parameters[param.name]}
+                        onSelect={(value) => handleParameterChange(param.name, value)}
+                    />
+                )
+            ))}
         </div>
     );
 }
