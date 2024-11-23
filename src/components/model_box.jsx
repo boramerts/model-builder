@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import CustomPicker from "./parameter_picker";
 import LayerPicker from "./layer_picker";
 import { layerConfigs, DEFAULT_LAYER } from "../config/layer_configs";
+import ParameterSelector from "./parameter_selector";
 
 export default function ModelBox({ layerNumber }) {
     const [selectedLayer, setSelectedLayer] = useState(DEFAULT_LAYER);
@@ -28,7 +29,7 @@ export default function ModelBox({ layerNumber }) {
     };
 
     return (
-        <div className="aspect-square h-full bg-white flex flex-col rounded-2xl border-2 border-gray-300 space-y-4 px-4 py-4">
+        <div className="w-60 h-full bg-white flex flex-col rounded-2xl border-2 border-gray-300 space-y-4 px-4 py-4">
             <LayerPicker
                 label={`Layer ${layerNumber}`}
                 options={Object.keys(layerConfigs)}
@@ -44,7 +45,7 @@ export default function ModelBox({ layerNumber }) {
                         onNumberChange={(value) => handleParameterChange(param.name, value)}
                     />
                 ) : (
-                    <LayerPicker
+                    <ParameterSelector
                         key={param.name}
                         label={param.label}
                         options={param.options}

@@ -19,6 +19,11 @@ export const layerConfigs = {
       { name: "returnSequences", type: "select", label: "Return Sequences", options: ["true", "false"], default: "false" },
       { name: "activation", type: "select", label: "Activation", options: ["tanh", "relu", "sigmoid"], default: "tanh" }
     ]
+  },
+  "MaxPooling": {
+    parameters: [
+      { name: "strides", type: "number", label: "Strides", default: "2"}
+    ]
   }
 };
 
