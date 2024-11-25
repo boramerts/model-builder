@@ -13,4 +13,8 @@
       -ms-overflow-style: none;  /* IE and Edge */
       scrollbar-width: none;  /* Firefox */
     }
+
+    .rounded-4xl {
+      border-radius: 2.5rem;
+    }
   }

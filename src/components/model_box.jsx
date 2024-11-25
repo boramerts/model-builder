@@ -4,7 +4,7 @@ import LayerPicker from "./layer_picker";
 import { layerConfigs, DEFAULT_LAYER } from "../config/layer_configs";
 import ParameterSelector from "./parameter_selector";
 
-export default function ModelBox({ layerNumber, id, onDelete}) {
+export default function ModelBox({ layerNumber, id, onDelete, updateLayer }) {
   const [selectedLayer, setSelectedLayer] = useState(DEFAULT_LAYER);
   const [parameters, setParameters] = useState({});
 
@@ -16,6 +16,11 @@ export default function ModelBox({ layerNumber, id, onDelete}) {
     });
     setParameters(newParameters);
   }, [selectedLayer]);
+
+  useEffect(() => {
+    // Call updateLayer whenever selectedLayer or parameters change
+    updateLayer(id, selectedLayer, parameters);
+  }, [id, selectedLayer, parameters, updateLayer]);
 
   const handleLayerChange = (layer) => {
     setSelectedLayer(layer);
@@ -29,7 +34,7 @@ export default function ModelBox({ layerNumber, id, onDelete}) {
   };
 
   return (
-    <div className="w-60 h-full bg-black flex flex-col rounded-2xl border-2 border-gray-300 overflow-hidden flex-shrink-0">
+    <div className="w-60 h-full bg-black flex flex-col rounded-3xl border-2 border-gray-300 overflow-hidden flex-shrink-0">
       <div className="space-y-4 px-4 py-4">
         <LayerPicker
           label={`Layer ${layerNumber}`}

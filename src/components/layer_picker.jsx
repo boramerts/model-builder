@@ -2,12 +2,12 @@ import React from "react";
 
 export default function LayerPicker({ label, options, onSelect, value, onDelete }) {
   return (
-    <div className="w-full flex flex-col items-start space-y-1">
+    <div className="w-full flex flex-col items-start space-y-1 group">
       <div className="w-full flex justify-between items-center">
         <span className="text-white font-medium flex-grow">{label}</span>
         <button 
           onClick={onDelete}
-          className="w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center text-white text-sm"
+          className="w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center text-white text-sm opacity-20 group-hover:opacity-100 transition-opacity duration-300"
         >
           X
         </button>
