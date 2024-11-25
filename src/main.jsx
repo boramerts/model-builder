@@ -16,6 +16,10 @@ const App = () => {
     setModelBoxes([...modelBoxes, modelBoxes.length + 1]);
   };
 
+  const deleteModelBox = (id) => {
+    setModelBoxes(modelBoxes.filter((boxId) => boxId !== id));
+  }
+
   return (
     <div className="flex flex-col justify-between min-h-screen px-20 py-10">
       {/* Top div */}
@@ -49,7 +53,11 @@ const App = () => {
       {/* Bottom div */}
       <div className="flex flex-row space-x-4 w-full h-64 bg-gray-300 rounded-3xl border-2 border-gray-400 p-5 overflow-x-auto scrollbar-none">
         {modelBoxes.map((id, index) => (
-          <ModelBox key={id} layerNumber={index + 1} />
+          <ModelBox key={id} 
+          id = {id}
+          layerNumber={index + 1}
+          onDelete={() => deleteModelBox(id)}
+          />
         ))}
         <button 
           onClick={addModelBox}

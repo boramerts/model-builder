@@ -4,7 +4,7 @@ import LayerPicker from "./layer_picker";
 import { layerConfigs, DEFAULT_LAYER } from "../config/layer_configs";
 import ParameterSelector from "./parameter_selector";
 
-export default function ModelBox({ layerNumber }) {
+export default function ModelBox({ layerNumber, id, onDelete}) {
   const [selectedLayer, setSelectedLayer] = useState(DEFAULT_LAYER);
   const [parameters, setParameters] = useState({});
 
@@ -36,6 +36,7 @@ export default function ModelBox({ layerNumber }) {
           options={Object.keys(layerConfigs)}
           onSelect={handleLayerChange}
           value={selectedLayer}
+          onDelete={onDelete}
         />
       </div>
       <div className="overflow-y-auto flex-col h-full space-y-4 px-4 py-4 bg-white">
