@@ -6,31 +6,39 @@ import ParameterSelector from "./parameter_selector";
 
 export default function ModelBox({ layerNumber, id, onDelete, updateLayer }) {
   const [selectedLayer, setSelectedLayer] = useState(DEFAULT_LAYER);
-  const [parameters, setParameters] = useState({});
-
-  useEffect(() => {
-    // Initialize parameters with defaults when layer changes
+  const [parameters, setParameters] = useState(() => {
+    // Initialize parameters with defaults
     const newParameters = {};
-    layerConfigs[selectedLayer].parameters.forEach((param) => {
+    layerConfigs[DEFAULT_LAYER].parameters.forEach((param) => {
       newParameters[param.name] = param.default;
     });
-    setParameters(newParameters);
-  }, [selectedLayer]);
+    return newParameters;
+  });
 
+  // Only run once on mount to set initial layer
   useEffect(() => {
-    // Call updateLayer whenever selectedLayer or parameters change
     updateLayer(id, selectedLayer, parameters);
-  }, [id, selectedLayer, parameters, updateLayer]);
+  }, []); // Empty dependency array
 
   const handleLayerChange = (layer) => {
+    // Initialize new parameters for the layer type
+    const newParameters = {};
+    layerConfigs[layer].parameters.forEach((param) => {
+      newParameters[param.name] = param.default;
+    });
+    
+    setParameters(newParameters);
     setSelectedLayer(layer);
+    updateLayer(id, layer, newParameters);
   };
 
   const handleParameterChange = (paramName, value) => {
-    setParameters((prev) => ({
-      ...prev,
+    const newParameters = {
+      ...parameters,
       [paramName]: value,
-    }));
+    };
+    setParameters(newParameters);
+    updateLayer(id, selectedLayer, newParameters);
   };
 
   return (
