@@ -1,0 +1,13 @@
+<svg width="156" height="176" viewBox="0 0 156 176" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="156" height="176" fill="#1E1E1E"/>
+<g id="Main Frame">
+<rect x="-134" y="-182" width="2679" height="1271" rx="38" fill="#EDEDED"/>
+<g id="Container">
+<rect id="Rounded Rectangle" x="0.5" y="0.5" width="123" height="123" fill="#D9D9D9" stroke="black"/>
+<rect id="Rounded Rectangle_2" x="8.5" y="13.5" width="123" height="123" fill="#D9D9D9" stroke="black"/>
+<rect id="Rounded Rectangle_3" x="16.5" y="26.5" width="123" height="123" fill="#D9D9D9" stroke="black"/>
+<rect id="Rounded Rectangle_4" x="24.5" y="39.5" width="123" height="123" fill="#D9D9D9" stroke="black"/>
+<rect id="Rounded Rectangle_5" x="32.5" y="52.5" width="123" height="123" fill="#D9D9D9" stroke="black"/>
+</g>
+</g>
+</svg>

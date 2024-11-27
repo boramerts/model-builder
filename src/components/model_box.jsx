@@ -33,9 +33,13 @@ export default function ModelBox({ layerNumber, id, onDelete, updateLayer }) {
   };
 
   const handleParameterChange = (paramName, value) => {
+    const paramConfig = layerConfigs[selectedLayer].parameters.find(p => p.name === paramName);
+    
+    const newValue = paramConfig.type === "number" ? parseInt(value) || 0 : value;
+    
     const newParameters = {
       ...parameters,
-      [paramName]: value,
+      [paramName]: newValue,
     };
     setParameters(newParameters);
     updateLayer(id, selectedLayer, newParameters);

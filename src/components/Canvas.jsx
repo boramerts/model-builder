@@ -81,7 +81,7 @@ export default function Canvas({ layers }) {
               <g
                 key={`layer-${layer.id}`}
                 dangerouslySetInnerHTML={{
-                  __html: shapeConfig.shape(x, y)
+                  __html: shapeConfig.shape(x, y, layer.parameters) // Pass layer parameters here
                 }}
               />
             );

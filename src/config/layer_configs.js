@@ -1,7 +1,7 @@
 export const layerConfigs = {
   CNN: {
     parameters: [
-      { name: "filters", type: "number", label: "Filters", default: "32" },
+      { name: "filters", type: "number", label: "Filters", default: "8" },
       { name: "kernelSize", type: "number", label: "Kernel Size", default: "3" },
       { name: "stride", type: "number", label: "Stride", default: "1" },
       { name: "padding", type: "select", label: "Padding", options: ["valid", "same"], default: "valid" }
