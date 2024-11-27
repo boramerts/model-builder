@@ -1,10 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { layerShapes } from '../config/shapes';
 
 export default function Canvas({ layers }) {
-  // Sort layers by their ID to maintain consistent order
-  const sortedLayers = [...layers].sort((a, b) => a.id - b.id);
+  // Sort and memoize layers to prevent unnecessary re-renders
+  const sortedLayers = useMemo(() => 
+    [...layers].sort((a, b) => a.id - b.id),
+    [layers]
+  );
 
   const calculatePosition = (index) => {
     const startX = 100;
@@ -17,18 +20,28 @@ export default function Canvas({ layers }) {
   };
 
   const renderConnections = () => {
+    if (!sortedLayers.length) return null;
+    
     return sortedLayers.slice(0, -1).map((layer, index) => {
+      const nextLayer = sortedLayers[index + 1];
+      if (!nextLayer) return null;
+
       const start = calculatePosition(index);
       const end = calculatePosition(index + 1);
       const startShape = layerShapes[layer.type];
+      const endShape = layerShapes[nextLayer.type];
+      
+      // Ensure all required values exist
+      if (!startShape || !endShape) return null;
+
       const startX = start.x + startShape.width;
       const startY = start.y + (startShape.height / 2);
       const endX = end.x;
-      const endY = end.y + (layerShapes[sortedLayers[index + 1].type].height / 2);
+      const endY = end.y + (endShape.height / 2);
 
       return (
         <path
-          key={`connection-${layer.id}-${sortedLayers[index + 1].id}`}
+          key={`connection-${layer.id}-${nextLayer.id}`}
           d={`M ${startX} ${startY} C ${startX + 40} ${startY}, ${endX - 40} ${endY}, ${endX} ${endY}`}
           stroke="#94A3B8"
           strokeWidth="2"
@@ -45,7 +58,6 @@ export default function Canvas({ layers }) {
 
   return (
     <TransformWrapper
-      key={`canvas-${layers.length}-${layers.map(l => l.id).join('-')}`}
       initialScale={1}
       minScale={0.5}
       maxScale={2}
@@ -63,9 +75,11 @@ export default function Canvas({ layers }) {
           {sortedLayers.map((layer, index) => {
             const { x, y } = calculatePosition(index);
             const shapeConfig = layerShapes[layer.type];
+            if (!shapeConfig) return null;
+            
             return (
               <g
-                key={`layer-${layer.id}-${index}`}
+                key={`layer-${layer.id}`}
                 dangerouslySetInnerHTML={{
                   __html: shapeConfig.shape(x, y)
                 }}

@@ -11,35 +11,24 @@ import ExportIcon from "@mui/icons-material/FileDownloadOutlined";
 import AddIcon from "@mui/icons-material/AddCircleOutline";
 
 const App = () => {
-  const [modelBoxes, setModelBoxes] = React.useState([1]);
+  const [modelBoxes, setModelBoxes] = React.useState([]);
   const [layers, setLayers] = React.useState([]);
 
   const addModelBox = () => {
-    const newId = modelBoxes.length + 1;
-    setModelBoxes([...modelBoxes, newId]);
+    const newId = Date.now(); // Use timestamp for unique IDs
+    setModelBoxes(prev => [...prev, newId]);
   };
 
   const deleteModelBox = (id) => {
     if (!id) return;
-    // Remove from modelBoxes
-    setModelBoxes(modelBoxes.filter((boxId) => boxId !== id));
-    
-    // Remove corresponding layer
-    setLayers(prevLayers => prevLayers.filter(layer => layer.id !== id));
+    setModelBoxes(prev => prev.filter(boxId => boxId !== id));
+    setLayers(prev => prev.filter(layer => layer.id !== id));
   };
 
   const updateLayer = (id, layerType, parameters) => {
-    setLayers((prevLayers) => {
-      const layerIndex = prevLayers.findIndex((layer) => layer.id === id);
-      const newLayer = { id, type: layerType, parameters };
-
-      if (layerIndex === -1) {
-        return [...prevLayers, newLayer];
-      }
-
-      const newLayers = [...prevLayers];
-      newLayers[layerIndex] = newLayer;
-      return newLayers;
+    setLayers(prev => {
+      const filtered = prev.filter(layer => layer.id !== id);
+      return [...filtered, { id, type: layerType, parameters }];
     });
   };
 
