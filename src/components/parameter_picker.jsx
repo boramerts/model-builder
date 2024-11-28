@@ -10,6 +10,7 @@ export default function CustomPicker({ text, onNumberChange, value }) {
                 className="w-20 border-2 border-gray-300 rounded-md text-center"
                 onChange={(e) => onNumberChange?.(e.target.value)}
                 min="1"
+                onWheel={(e) => e.target.blur()}
             />
         </div>
     );

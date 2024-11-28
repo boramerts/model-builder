@@ -4,6 +4,7 @@ import Dropdown from "./components/dropdown";
 import ModelBox from "./components/model_box.jsx";
 import Canvas from "./components/Canvas";
 import "./output.css";
+import { stylePresets } from './config/style_presets'; // Add this
 
 import FileIcon from "@mui/icons-material/NoteAddOutlined";
 import SaveIcon from "@mui/icons-material/SaveOutlined";
@@ -13,6 +14,7 @@ import AddIcon from "@mui/icons-material/AddCircleOutline";
 const App = () => {
   const [modelBoxes, setModelBoxes] = React.useState([]);
   const [layers, setLayers] = React.useState([]);
+  const [selectedStyle, setSelectedStyle] = React.useState("default");
 
   const addModelBox = () => {
     const newId = Date.now(); // Use timestamp for unique IDs
@@ -32,11 +34,16 @@ const App = () => {
     });
   };
 
+  // Add style handler
+  const handleStyleChange = (style) => {
+    setSelectedStyle(style);
+  };
+
   return (
     <div className="relative min-h-screen">
       {/* Canvas at bottom of stack */}
       <div className="absolute inset-0">
-        <Canvas layers={layers} />
+        <Canvas layers={layers} selectedStyle={selectedStyle} />
       </div>
 
       {/* Controls on top */}
@@ -47,8 +54,12 @@ const App = () => {
             <p className="text-black text-center text-2xl font-bold">
               Model Builder
             </p>
-            <p className="text-black text-center font-normal p-5">Preset:</p>
-            <Dropdown></Dropdown>
+            <p className="text-black text-center font-normal p-5 ps-10">Style:</p>
+            <Dropdown 
+              options={Object.keys(stylePresets)}
+              value={selectedStyle}
+              onChange={handleStyleChange}
+            />
           </div>
 
           <div className="w-1/2 h-20 flex flex-row items-center justify-end p-5 space-x-3">

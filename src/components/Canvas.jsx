@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { layerShapes } from '../config/shapes';
 
-export default function Canvas({ layers }) {
+export default function Canvas({ layers, selectedStyle }) { // Add selectedStyle prop
   // Sort and memoize layers to prevent unnecessary re-renders
   const sortedLayers = useMemo(() => 
     [...layers].sort((a, b) => a.id - b.id),
@@ -81,7 +81,7 @@ export default function Canvas({ layers }) {
               <g
                 key={`layer-${layer.id}`}
                 dangerouslySetInnerHTML={{
-                  __html: shapeConfig.shape(x, y, layer.parameters) // Pass layer parameters here
+                  __html: shapeConfig.shape(x, y, layer.parameters, false, selectedStyle) // Add selectedStyle here
                 }}
               />
             );
