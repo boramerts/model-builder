@@ -1,6 +1,6 @@
 // src/config/style_presets.js
 export const stylePresets = {
-    Default: {
+    default: {
       CNN: {
         fill: "#8B5CF6",
         cornerRadius: 8,
@@ -26,7 +26,7 @@ export const stylePresets = {
         stroke: "black"
       }
     },
-    Minimal: {
+    minimal: {
       CNN: {
         fill: "#ffffff",
         cornerRadius: 0,
@@ -52,7 +52,7 @@ export const stylePresets = {
         stroke: "black"
       }
     },
-    Rounded: {
+    rounded: {
       CNN: {
         fill: "#4F46E5",
         cornerRadius: 16,
