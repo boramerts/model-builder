@@ -11,7 +11,7 @@ export const layerConfigs = {
   },
   "Dense": {
     parameters: [
-      { name: "units", type: "number", label: "Units", default: "64" },
+      { name: "units", type: "number", label: "Units", default: "8" },
       { name: "activation", type: "select", label: "Activation", options: ["relu", "sigmoid", "tanh"], default: "relu" }
     ]
   },

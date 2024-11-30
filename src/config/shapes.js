@@ -63,29 +63,102 @@ export const layerShapes = {
     shape: (x, y, params = {}, isSelected = false, style = "default") => {
       const styleConfig =
         stylePresets[style]?.Dense || stylePresets.default.Dense;
+      const units = parseInt(params.units) || 1;
 
-      return `
-        <g transform="translate(${x},${y})">
-          <rect 
-            width="100" 
-            height="60" 
-            rx="${styleConfig.cornerRadius}"
+      // Return simple rectangle for minimal style
+      if (style === "minimal") {
+        return `
+          <g transform="translate(${x},${y})">
+            <rect 
+              width="100" 
+              height="60" 
+              rx="${styleConfig.cornerRadius}"
+              fill="${styleConfig.fill}"
+              opacity="${styleConfig.opacity}"
+              stroke="${isSelected ? "white" : styleConfig.stroke}"
+              stroke-width="${isSelected ? 3 : 1}"
+            />
+            <text 
+              x="50" 
+              y="35" 
+              text-anchor="middle" 
+              fill="${isSelected ? "white" : "black"}" 
+              font-size="14"
+            >
+              Dense
+            </text>
+          </g>
+        `;
+      }
+
+      // Return circles for default style
+      const circleGap = 20; // Gap between circles
+      const dotGap = 10; // Gap between dots
+      const maxCircles = 10;
+      const dotSize = 2;
+      const circleSize = 6;
+
+      // Calculate vertical positions
+      const topStart = 12; // Start y position for top circles
+      const middleStart = 3 * circleGap + 3 * circleSize - dotGap; // Start y position for dots
+      const bottomStart = middleStart + 3 * dotGap + 3 * dotSize; // Start y position for bottom circles
+
+      const generateCircles = (count, yOffset) => {
+        return Array.from(
+          { length: count },
+          (_, i) => `
+          <circle
+            cx="50"
+            cy="${yOffset + i * circleGap}"
+            r="${circleSize}"
             fill="${styleConfig.fill}"
-            opacity="${styleConfig.opacity}"
             stroke="${isSelected ? "white" : styleConfig.stroke}"
             stroke-width="${isSelected ? 3 : 1}"
-          />
-          <text 
-            x="50" 
-            y="35" 
-            text-anchor="middle" 
-            fill="${isSelected ? "white" : "black"}" 
-            font-size="14"
-          >
-            Dense
-          </text>
-        </g>
-      `;
+          />`
+        ).join("");
+      };
+
+      const generateDots = (yOffset) => {
+        return Array.from(
+          { length: 3 },
+          (_, i) => `
+          <circle
+            cx="50"
+            cy="${yOffset + i * dotGap}"
+            r="${dotSize}"
+            fill="${styleConfig.fill}"
+            stroke="none"
+          />`
+        ).join("");
+      };
+
+      const circles =
+        units > maxCircles
+          ? `${generateCircles(3, topStart)}
+          
+          ${generateDots(middleStart)}
+          
+          ${generateCircles(3, bottomStart)}`
+          : generateCircles(Math.min(units, maxCircles), topStart);
+
+      return `
+          <g transform="translate(${x},${y})">
+            ${circles}
+            <text 
+              x="50" 
+              y="${
+                units > 10
+                  ? bottomStart + 3 * circleGap + 3 * circleSize // Last circle position + size
+                  : topStart + units * circleGap + circleSize + 5 // All circles height + padding
+              }"
+              text-anchor="middle" 
+              fill="${isSelected ? "white" : "black"}" 
+              font-size="14"
+            >
+              Dense
+            </text>
+          </g>
+        `;
     },
   },
   LSTM: {
