@@ -7,12 +7,39 @@ export const layerShapes = {
     height: 80,
     shape: (x, y, params = {}, isSelected = false, style = "default") => {
       const styleConfig = stylePresets[style]?.CNN || stylePresets.default.CNN;
+      
       // Convert string parameters to numbers
       const width = parseInt(params.width) || 50;
       const height = parseInt(params.height) || 50;
       const filters = parseInt(params.filters) || 32;
       const kernelSize = parseInt(params.kernelSize) || 3;
       const stride = parseInt(params.stride) || 1;
+
+      // Return simple rectangle for minimal style
+      if (style === "minimal") {
+        return `
+          <g transform="translate(${x},${y})">
+            <rect 
+              width="100" 
+              height="60" 
+              rx="${styleConfig.cornerRadius}"
+              fill="${styleConfig.fill}"
+              opacity="${styleConfig.opacity}"
+              stroke="${isSelected ? "white" : styleConfig.stroke}"
+              stroke-width="${isSelected ? 3 : 1}"
+            />
+            <text 
+              x="50" 
+              y="35" 
+              text-anchor="middle" 
+              fill="${isSelected ? "white" : "black"}" 
+              font-size="14"
+            >
+              CNN
+            </text>
+          </g>
+        `;
+      }
 
       const stackOffset = 8;
       const numStacks = Math.max(filters, 1); // Limit visual stacks to 5
@@ -165,8 +192,33 @@ export const layerShapes = {
     width: 130,
     height: 70,
     shape: (x, y, params = {}, isSelected = false, style = "default") => {
-      const styleConfig =
-        stylePresets[style]?.LSTM || stylePresets.default.LSTM;
+      const styleConfig = stylePresets[style]?.LSTM || stylePresets.default.LSTM;
+      
+      // For minimal style use standard dimensions
+      if (style === "minimal") {
+        return `
+          <g transform="translate(${x},${y})">
+            <rect 
+              width="100" 
+              height="60" 
+              rx="${styleConfig.cornerRadius}"
+              fill="${styleConfig.fill}"
+              opacity="${styleConfig.opacity}"
+              stroke="${isSelected ? "white" : styleConfig.stroke}"
+              stroke-width="${isSelected ? 3 : 1}"
+            />
+            <text 
+              x="50" 
+              y="35" 
+              text-anchor="middle"
+              fill="${isSelected ? "white" : "black"}" 
+              font-size="14"
+            >
+              LSTM
+            </text>
+          </g>
+        `;
+      }
 
       return `
         <g transform="translate(${x},${y})">
@@ -181,7 +233,7 @@ export const layerShapes = {
           />
           <text 
             x="65" 
-            y="40" 
+            y="35" 
             text-anchor="middle"
             fill="${isSelected ? "white" : "black"}" 
             font-size="14"

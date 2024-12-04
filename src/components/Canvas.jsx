@@ -10,15 +10,43 @@ export default function Canvas({ layers, selectedStyle }) {
     [layers]
   );
 
+  // Calculate actual height for Dense layers
+  const getDenseHeight = (units) => {
+    const circleGap = 20;
+    if (units > 10) {
+      // 3 circles top + 3 dots + 3 circles bottom + padding
+      return (6 * circleGap) + (3 * 10) + 40;
+    }
+    // Regular height for units <= 10
+    return units * circleGap + 40;
+  };
+
+  // Get actual layer height based on type, parameters, and style
+  const getLayerHeight = (layer) => {
+    // For minimal style, use fixed heights
+    if (selectedStyle === "minimal") {
+      return 60; // All shapes use 60px height in minimal style
+    }
+
+    // For default style, use dynamic heights
+    if (layer.type === "Dense") {
+      return getDenseHeight(parseInt(layer.parameters.units) || 1);
+    }
+    return layerShapes[layer.type]?.height || 0;
+  };
+
   // Helper function to calculate x,y coordinates for each layer
-  // Creates a horizontal layout with fixed spacing between layers
   const calculatePosition = (index) => {
     const startX = 100; // Initial X offset from left
-    const startY = 400; // Fixed Y position for all layers
+    const centerY = 400; // Vertical center position
     const spacing = 150; // Horizontal spacing between layers
+    
+    const layer = sortedLayers[index];
+    const height = getLayerHeight(layer);
+    
     return {
       x: startX + index * spacing,
-      y: startY,
+      y: centerY - (height / 2), // Center the layer vertically
     };
   };
 
@@ -26,12 +54,10 @@ export default function Canvas({ layers, selectedStyle }) {
   const renderConnections = () => {
     if (!sortedLayers.length) return null;
 
-    // Map through layers except the last one to create connections
     return sortedLayers.slice(0, -1).map((layer, index) => {
       const nextLayer = sortedLayers[index + 1];
       if (!nextLayer) return null;
 
-      // Calculate positions for current and next layer
       const start = calculatePosition(index);
       const end = calculatePosition(index + 1);
       const startShape = layerShapes[layer.type];
@@ -39,109 +65,109 @@ export default function Canvas({ layers, selectedStyle }) {
 
       if (!startShape || !endShape) return null;
 
-      // Special case: Dense-to-Dense connections
-      // Creates a neural network style connection pattern between nodes
-      if (layer.type === "Dense" && nextLayer.type === "Dense") {
-        let isFirstLong = layer.parameters.units > 10;
-        let isSecondLong = nextLayer.parameters.units > 10;
-        let startUnits = isFirstLong
-          ? 6
-          : Math.min(parseInt(layer.parameters.units) || 1, 10);
-        let endUnits = isSecondLong
-          ? 6
-          : Math.min(parseInt(nextLayer.parameters.units) || 1, 10);
-        const circleGap = 20; // Vertical spacing between nodes
-        const startY = start.y + 15; // Offset from layer top
-        const endY = end.y + 15;
+      // For minimal style or non-Dense layers, use simple connections
+      if (selectedStyle === "minimal" || !(layer.type === "Dense" && nextLayer.type === "Dense")) {
+        const startX = start.x + (selectedStyle === "minimal" ? 100 : startShape.width);
+        const startY = start.y + (selectedStyle === "minimal" ? 30 : startShape.height / 2);
+        const endX = end.x;
+        const endY = end.y + (selectedStyle === "minimal" ? 30 : endShape.height / 2);
 
-        // Create connections between each node in both layers
-        return Array.from({ length: startUnits })
-          .map((_, i) =>
-            Array.from({ length: endUnits }).map((_, j) => {
-              let x1, y1, x2, y2;
-              // Calculate start and end points for each connection
-              if (!isFirstLong && !isSecondLong) {
-                // Both layers are short
-                x1 = start.x + 50; // Align with circle centers
-                y1 = startY + i * circleGap;
-                x2 = end.x + 50;
-                y2 = endY + j * circleGap;
-              } else if (isFirstLong && !isSecondLong) {
-                // First layer is long
-                if (i < 3) {
-                  x1 = start.x + 50;
-                  y1 = startY + i * circleGap;
-                } else {
-                  x1 = start.x + 50;
-                  y1 = startY + i * circleGap + 3 * 10 + 3 * 2;
-                }
-                x2 = end.x + 50;
-                y2 = endY + j * circleGap;
-              } else if (!isFirstLong && isSecondLong) {
-                // Second layer is long
-                x1 = start.x + 50;
-                y1 = startY + i * circleGap; // First layer y depends on i
-                if (j < 3) {
-                  x2 = end.x + 50;
-                  y2 = endY + j * circleGap; // Second layer y depends on j
-                } else {
-                  x2 = end.x + 50;
-                  y2 = endY + j * circleGap + 3 * 10 + 3; // Keep gap pattern consistent
-                }
-              } else {
-                // Both layers are long
-                if (i < 3) {
-                  x1 = start.x + 50;
-                  y1 = startY + i * circleGap;
-                } else {
-                  x1 = start.x + 50;
-                  y1 = startY + i * circleGap + 3 * 10 + 3;
-                }
-                if (j < 3) {
-                  x2 = end.x + 50;
-                  y2 = endY + j * circleGap;
-                } else {
-                  x2 = end.x + 50;
-                  y2 = endY + j * circleGap + 3 * 10 + 3;
-                }
-              }
-
-              // Create bezier curve path between nodes
-              return (
-                <path
-                  key={`connection-${layer.id}-${nextLayer.id}-${i}-${j}`}
-                  d={`M ${x1} ${y1} C ${x1 + 20} ${y1}, ${
-                    x2 - 20
-                  } ${y2}, ${x2} ${y2}`}
-                  stroke="#94A3B8"
-                  strokeWidth="2"
-                  fill="none"
-                  opacity="0.5"
-                />
-              );
-            })
-          )
-          .flat();
+        return (
+          <path
+            key={`connection-${layer.id}-${nextLayer.id}`}
+            d={`M ${startX} ${startY} C ${startX + 40} ${startY}, ${endX - 40} ${endY}, ${endX} ${endY}`}
+            stroke="#94A3B8"
+            strokeWidth="2"
+            fill="none"
+          />
+        );
       }
 
-      // Default connection for non-Dense layer pairs
-      // Single curved line between layer centers
-      const startX = start.x + startShape.width;
-      const startY = start.y + startShape.height / 2;
-      const endX = end.x;
-      const endY = end.y + endShape.height / 2;
+      // Dense-to-Dense connections for non-minimal style
+      let isFirstLong = layer.parameters.units > 10;
+      let isSecondLong = nextLayer.parameters.units > 10;
+      let startUnits = isFirstLong
+        ? 6
+        : Math.min(parseInt(layer.parameters.units) || 1, 10);
+      let endUnits = isSecondLong
+        ? 6
+        : Math.min(parseInt(nextLayer.parameters.units) || 1, 10);
+      const circleGap = 20; // Vertical spacing between nodes
+      
+      // Calculate vertical center offsets for both layers
+      const startTotalHeight = isFirstLong ? (6 * circleGap) : (startUnits * circleGap);
+      const endTotalHeight = isSecondLong ? (6 * circleGap) : (endUnits * circleGap);
+      const startY = start.y + 20; // Add padding from top
+      const endY = end.y + 20;   // Add padding from top
 
-      return (
-        <path
-          key={`connection-${layer.id}-${nextLayer.id}`}
-          d={`M ${startX} ${startY} C ${startX + 40} ${startY}, ${
-            endX - 40
-          } ${endY}, ${endX} ${endY}`}
-          stroke="#94A3B8"
-          strokeWidth="2"
-          fill="none"
-        />
-      );
+      // Create connections between each node in both layers
+      return Array.from({ length: startUnits })
+        .map((_, i) =>
+          Array.from({ length: endUnits }).map((_, j) => {
+            let x1, y1, x2, y2;
+            // Calculate start and end points for each connection
+            if (!isFirstLong && !isSecondLong) {
+              // Both layers are short
+              x1 = start.x + 50; // Align with circle centers
+              y1 = startY + i * circleGap;
+              x2 = end.x + 50;
+              y2 = endY + j * circleGap;
+            } else if (isFirstLong && !isSecondLong) {
+              // First layer is long
+              if (i < 3) {
+                x1 = start.x + 50;
+                y1 = startY + i * circleGap;
+              } else {
+                x1 = start.x + 50;
+                y1 = startY + i * circleGap + 3 * 10 + 3 * 2;
+              }
+              x2 = end.x + 50;
+              y2 = endY + j * circleGap;
+            } else if (!isFirstLong && isSecondLong) {
+              // Second layer is long
+              x1 = start.x + 50;
+              y1 = startY + i * circleGap; // First layer y depends on i
+              if (j < 3) {
+                x2 = end.x + 50;
+                y2 = endY + j * circleGap; // Second layer y depends on j
+              } else {
+                x2 = end.x + 50;
+                y2 = endY + j * circleGap + 3 * 10 + 3; // Keep gap pattern consistent
+              }
+            } else {
+              // Both layers are long
+              if (i < 3) {
+                x1 = start.x + 50;
+                y1 = startY + i * circleGap;
+              } else {
+                x1 = start.x + 50;
+                y1 = startY + i * circleGap + 3 * 10 + 3;
+              }
+              if (j < 3) {
+                x2 = end.x + 50;
+                y2 = endY + j * circleGap;
+              } else {
+                x2 = end.x + 50;
+                y2 = endY + j * circleGap + 3 * 10 + 3;
+              }
+            }
+
+            // Create bezier curve path between nodes
+            return (
+              <path
+                key={`connection-${layer.id}-${nextLayer.id}-${i}-${j}`}
+                d={`M ${x1} ${y1} C ${x1 + 20} ${y1}, ${
+                  x2 - 20
+                } ${y2}, ${x2} ${y2}`}
+                stroke="#94A3B8"
+                strokeWidth="2"
+                fill="none"
+                opacity="0.5"
+              />
+            );
+          })
+        )
+        .flat();
     });
   };
 
