@@ -1,13 +1,9 @@
-import React, { useEffect, useMemo } from "react";
-import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch"; // For zoom/pan functionality
+import React, { useMemo } from "react";
+import { MapInteraction } from 'react-map-interaction';
 import { layerShapes } from "../config/shapes";
 
-export default function Canvas({ layers, selectedStyle }) {
-  // Remove the ID-based sorting, use layers array directly
-  const sortedLayers = useMemo(
-    () => layers,
-    [layers]
-  );
+export default function Canvas({ layers, selectedStyle, position, onPositionChange }) {
+  const sortedLayers = useMemo(() => layers, [layers]);
 
   // Calculate actual height for Dense layers
   const getDenseHeight = (units) => {
@@ -37,7 +33,7 @@ export default function Canvas({ layers, selectedStyle }) {
   // Helper function to calculate x,y coordinates for each layer
   const calculatePosition = (index) => {
     const startX = 100; // Initial X offset from left
-    const centerY = 400; // Vertical center position
+    const centerY = 350; // Vertical center position
     const spacing = 150; // Horizontal spacing between layers
 
     const layer = sortedLayers[index];
@@ -183,45 +179,64 @@ export default function Canvas({ layers, selectedStyle }) {
   };
 
   return (
-    // Wrap canvas in zoom/pan container
-    <TransformWrapper
-      initialScale={1}
-      minScale={0.5}
-      maxScale={2}
-      className="w-full h-full"
+    <div 
+      className="w-full h-full relative" 
+      style={{ 
+        touchAction: 'none', // Prevents default touch actions
+        cursor: 'grab'      // Shows grab cursor to indicate draggable
+      }}
     >
-      <TransformComponent
-        wrapperClass="w-full h-full"
-        contentClass="w-full h-full"
+      <MapInteraction
+        value={position}
+        onChange={onPositionChange}
+        minScale={0.5}
+        maxScale={2}
+        translationBounds={{ // Optional: restrict panning
+          xMin: -1000,
+          xMax: 1000,
+          yMin: -1000,
+          yMax: 1000
+        }}
       >
-        {/* Main SVG canvas */}
-        <svg className="w-full h-full bg-white" viewBox="0 0 1000 1000">
-          {/* Render layer connections first (background) */}
-          {sortedLayers.length > 0 && renderConnections()}
+        {({ scale, translation }) => (
+          <div
+            style={{
+              transform: `translate(${translation.x}px, ${translation.y}px) scale(${scale})`,
+              transformOrigin: '0 0',
+              width: '100%',
+              height: '100%'
+            }}
+          >
+            <svg 
+              className="w-full h-full bg-white"
+              viewBox="0 0 1000 1000"
+              style={{ pointerEvents: 'auto' }} // Ensures SVG receives events
+            >
+              {sortedLayers.length > 0 && renderConnections()}
+              {sortedLayers.map((layer, index) => {
+                const { x, y } = calculatePosition(index);
+                const shapeConfig = layerShapes[layer.type];
+                if (!shapeConfig) return null;
 
-          {/* Render layer shapes on top */}
-          {sortedLayers.map((layer, index) => {
-            const { x, y } = calculatePosition(index);
-            const shapeConfig = layerShapes[layer.type];
-            if (!shapeConfig) return null;
-
-            return (
-              <g
-                key={`layer-${layer.id}`}
-                dangerouslySetInnerHTML={{
-                  __html: shapeConfig.shape(
-                    x,
-                    y,
-                    layer.parameters,
-                    false,
-                    selectedStyle
-                  ),
-                }}
-              />
-            );
-          })}
-        </svg>
-      </TransformComponent>
-    </TransformWrapper>
+                return (
+                  <g
+                    key={`layer-${layer.id}`}
+                    dangerouslySetInnerHTML={{
+                      __html: shapeConfig.shape(
+                        x,
+                        y,
+                        layer.parameters,
+                        false,
+                        selectedStyle
+                      ),
+                    }}
+                  />
+                );
+              })}
+            </svg>
+          </div>
+        )}
+      </MapInteraction>
+    </div>
   );
 }
