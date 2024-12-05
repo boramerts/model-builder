@@ -9,6 +9,7 @@ import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, horizontalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import SortableModelBox from './components/SortableModelBox';
 import { DEFAULT_LAYER } from './config/layer_configs';
+import ExportDialog from './components/ExportDialog';
 
 import FileIcon from "@mui/icons-material/NoteAddOutlined";
 import SaveIcon from "@mui/icons-material/SaveOutlined";
@@ -23,6 +24,7 @@ const App = () => {
     scale: 1,
     translation: { x: 200, y: 50 }
   });
+  const [showExportDialog, setShowExportDialog] = React.useState(false);
 
   const addModelBox = () => {
     const newId = Date.now();
@@ -86,6 +88,76 @@ const App = () => {
     });
   };
 
+  const handleExport = async (format) => {
+    const svgElement = document.querySelector('svg');
+    if (!svgElement) return;
+
+    // Get SVG content bounds
+    const bbox = svgElement.getBBox();
+    const padding = 50;
+    const scaleFactor = 3; // Increase resolution by 5x
+
+    // Create copy with proper dimensions
+    const svgCopy = svgElement.cloneNode(true);
+    const width = bbox.width + padding * 2;
+    const height = bbox.height + padding * 2;
+    
+    svgCopy.setAttribute('width', width);
+    svgCopy.setAttribute('height', height);
+    svgCopy.setAttribute('viewBox', `${bbox.x - padding} ${bbox.y - padding} ${width} ${height}`);
+    
+    if (format === 'svg') {
+      const serializer = new XMLSerializer();
+      const svgString = serializer.serializeToString(svgCopy);
+      const blob = new Blob([svgString], {type: 'image/svg+xml'});
+      downloadFile(blob, 'model_diagram.svg');
+    } else {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const svgString = new XMLSerializer().serializeToString(svgCopy);
+      const img = new Image();
+      
+      // Set canvas size with scale factor for higher resolution
+      canvas.width = width * scaleFactor;
+      canvas.height = height * scaleFactor;
+      
+      // Scale the context to match the increased size
+      ctx.scale(scaleFactor, scaleFactor);
+      
+      const blob = new Blob([svgString], {type: 'image/svg+xml;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        canvas.toBlob((blob) => {
+          downloadFile(blob, `model_diagram.${format}`);
+        }, `image/${format}`, 1.0); // Add quality parameter for JPEG
+        
+        URL.revokeObjectURL(url);
+      };
+      
+      img.src = url;
+    }
+    
+    setShowExportDialog(false);
+  };
+
+  const downloadFile = (blob, filename) => {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportClick = () => {
+    setShowExportDialog(true);
+  };
+
   return (
     <div className="relative min-h-screen">
       {/* Canvas container with pointer events enabled */}
@@ -132,7 +204,10 @@ const App = () => {
                     <SaveIcon></SaveIcon>
                     <p>Save</p>
                   </button>
-                  <button className="px-4 py-3 bg-gray-200 rounded-xl hover:bg-gray-500 space-x-2 flex flex-row">
+                  <button 
+                    className="px-4 py-3 bg-gray-200 rounded-xl hover:bg-gray-500 space-x-2 flex flex-row"
+                    onClick={handleExportClick}
+                  >
                     <ExportIcon></ExportIcon>
                     <p>Export</p>
                   </button>
@@ -173,6 +248,12 @@ const App = () => {
           </div>
         </div>
       </div>
+      {showExportDialog && (
+        <ExportDialog
+          onClose={() => setShowExportDialog(false)}
+          onExport={handleExport}
+        />
+      )}
     </div>
   );
 };

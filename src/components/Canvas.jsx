@@ -5,35 +5,51 @@ import { layerShapes } from "../config/shapes";
 export default function Canvas({ layers, selectedStyle, position, onPositionChange }) {
   const sortedLayers = useMemo(() => layers, [layers]);
 
-  // Calculate actual height for Dense layers
+  // Helper functions first
   const getDenseHeight = (units) => {
     const circleGap = 20;
     if (units > 10) {
-      // 3 circles top + 3 dots + 3 circles bottom + padding
       return 6 * circleGap + 3 * 10 + 40;
     }
-    // Regular height for units <= 10
     return units * circleGap + 40;
   };
 
-  // Get actual layer height based on type, parameters, and style
   const getLayerHeight = (layer) => {
-    // For minimal style, use fixed heights
     if (selectedStyle === "minimal") {
-      return 60; // All shapes use 60px height in minimal style
+      return 60;
     }
-
-    // For default style, use dynamic heights
     if (layer.type === "Dense") {
       return getDenseHeight(parseInt(layer.parameters.units) || 1);
     }
     return layerShapes[layer.type]?.height || 0;
   };
 
+  // Now we can use getLayerHeight in dimensions calculation
+  const dimensions = useMemo(() => {
+    if (!sortedLayers.length) return { width: 1000, height: 700 };
+
+    const padding = 200;
+    const spacing = 150;
+    
+    const width = Math.max(
+      1000,
+      padding * 2 + (sortedLayers.length - 1) * spacing + 200
+    );
+
+    const maxHeight = sortedLayers.reduce((max, layer) => {
+      const height = getLayerHeight(layer);
+      return Math.max(max, height);
+    }, 0);
+
+    const height = Math.max(700, maxHeight + padding * 2);
+
+    return { width, height };
+  }, [sortedLayers, selectedStyle]); // Add selectedStyle to dependencies
+
   // Helper function to calculate x,y coordinates for each layer
   const calculatePosition = (index) => {
     const startX = 100; // Initial X offset from left
-    const centerY = 350; // Vertical center position
+    const centerY = dimensions.height / 2; // Vertical center position
     const spacing = 150; // Horizontal spacing between layers
 
     const layer = sortedLayers[index];
@@ -191,11 +207,11 @@ export default function Canvas({ layers, selectedStyle, position, onPositionChan
         onChange={onPositionChange}
         minScale={0.5}
         maxScale={2}
-        translationBounds={{ // Optional: restrict panning
-          xMin: -1000,
-          xMax: 1000,
-          yMin: -1000,
-          yMax: 1000
+        translationBounds={{
+          xMin: -dimensions.width,
+          xMax: dimensions.width,
+          yMin: -dimensions.height,
+          yMax: dimensions.height
         }}
       >
         {({ scale, translation }) => (
@@ -209,7 +225,7 @@ export default function Canvas({ layers, selectedStyle, position, onPositionChan
           >
             <svg 
               className="w-full h-full bg-white"
-              viewBox="0 0 1000 1000"
+              viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
               style={{ pointerEvents: 'auto' }} // Ensures SVG receives events
             >
               {sortedLayers.length > 0 && renderConnections()}
