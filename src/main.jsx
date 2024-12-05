@@ -5,6 +5,10 @@ import ModelBox from "./components/model_box.jsx";
 import Canvas from "./components/Canvas";
 import "./output.css";
 import { stylePresets } from './config/style_presets'; // Add this
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { SortableContext, horizontalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
+import SortableModelBox from './components/SortableModelBox';
+import { DEFAULT_LAYER } from './config/layer_configs';
 
 import FileIcon from "@mui/icons-material/NoteAddOutlined";
 import SaveIcon from "@mui/icons-material/SaveOutlined";
@@ -17,8 +21,14 @@ const App = () => {
   const [selectedStyle, setSelectedStyle] = React.useState("default");
 
   const addModelBox = () => {
-    const newId = Date.now(); // Use timestamp for unique IDs
+    const newId = Date.now();
     setModelBoxes(prev => [...prev, newId]);
+    // Initialize the layer immediately with default values
+    setLayers(prev => [...prev, { 
+      id: newId, 
+      type: DEFAULT_LAYER, 
+      parameters: {} 
+    }]);
   };
 
   const deleteModelBox = (id) => {
@@ -29,14 +39,40 @@ const App = () => {
 
   const updateLayer = (id, layerType, parameters) => {
     setLayers(prev => {
-      const filtered = prev.filter(layer => layer.id !== id);
-      return [...filtered, { id, type: layerType, parameters }];
+      // Find the layer index
+      const index = prev.findIndex(layer => layer.id === id);
+      if (index === -1) return prev;
+
+      // Create new array with updated layer at same position
+      const newLayers = [...prev];
+      newLayers[index] = { ...newLayers[index], type: layerType, parameters };
+      return newLayers;
     });
   };
 
   // Add style handler
   const handleStyleChange = (style) => {
     setSelectedStyle(style);
+  };
+
+  const handleDragEnd = (event) => {
+    const {active, over} = event;
+    
+    if (active.id !== over.id) {  
+      setModelBoxes((items) => {
+        const oldIndex = items.indexOf(active.id);
+        const newIndex = items.indexOf(over.id);
+        
+        const newOrder = arrayMove(items, oldIndex, newIndex);
+        // Update layers to match new model box order
+        setLayers(prev => {
+          const layerMap = new Map(prev.map(layer => [layer.id, layer]));
+          return newOrder.map(id => layerMap.get(id)).filter(Boolean);
+        });
+        
+        return newOrder;
+      });
+    }
   };
 
   return (
@@ -83,15 +119,19 @@ const App = () => {
 
         {/* Bottom div */}
         <div className="flex flex-row space-x-4 w-full h-64 bg-gray-300/90 backdrop-blur rounded-4xl border-2 border-gray-400 p-5 overflow-x-auto scrollbar-none">
-          {modelBoxes.map((id, index) => (
-            <ModelBox
-              key={id}
-              id={id}
-              layerNumber={index + 1}
-              onDelete={() => deleteModelBox(id)}
-              updateLayer={updateLayer} // Add this prop
-            />
-          ))}
+          <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={modelBoxes} strategy={horizontalListSortingStrategy}>
+              {modelBoxes.map((id, index) => (
+                <SortableModelBox
+                  key={id}
+                  id={id}
+                  layerNumber={index + 1}
+                  onDelete={() => deleteModelBox(id)}
+                  updateLayer={updateLayer}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
           <button
             onClick={addModelBox}
             className="aspect-square h-full bg-white rounded-3xl border-2 border-gray-300 hover:bg-gray-100 flex flex-col items-center justify-center space-y-4"

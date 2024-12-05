@@ -3,10 +3,9 @@ import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch"; // 
 import { layerShapes } from "../config/shapes";
 
 export default function Canvas({ layers, selectedStyle }) {
-  // Memoize sorted layers to prevent unnecessary recalculations
-  // Sort by ID to maintain consistent layer order
+  // Remove the ID-based sorting, use layers array directly
   const sortedLayers = useMemo(
-    () => [...layers].sort((a, b) => a.id - b.id),
+    () => layers,
     [layers]
   );
 
@@ -15,7 +14,7 @@ export default function Canvas({ layers, selectedStyle }) {
     const circleGap = 20;
     if (units > 10) {
       // 3 circles top + 3 dots + 3 circles bottom + padding
-      return (6 * circleGap) + (3 * 10) + 40;
+      return 6 * circleGap + 3 * 10 + 40;
     }
     // Regular height for units <= 10
     return units * circleGap + 40;
@@ -40,13 +39,13 @@ export default function Canvas({ layers, selectedStyle }) {
     const startX = 100; // Initial X offset from left
     const centerY = 400; // Vertical center position
     const spacing = 150; // Horizontal spacing between layers
-    
+
     const layer = sortedLayers[index];
     const height = getLayerHeight(layer);
-    
+
     return {
       x: startX + index * spacing,
-      y: centerY - (height / 2), // Center the layer vertically
+      y: centerY - height / 2, // Center the layer vertically
     };
   };
 
@@ -66,16 +65,24 @@ export default function Canvas({ layers, selectedStyle }) {
       if (!startShape || !endShape) return null;
 
       // For minimal style or non-Dense layers, use simple connections
-      if (selectedStyle === "minimal" || !(layer.type === "Dense" && nextLayer.type === "Dense")) {
-        const startX = start.x + (selectedStyle === "minimal" ? 100 : startShape.width);
-        const startY = start.y + (selectedStyle === "minimal" ? 30 : startShape.height / 2);
+      if (
+        selectedStyle === "minimal" ||
+        !(layer.type === "Dense" && nextLayer.type === "Dense")
+      ) {
+        const startX =
+          start.x + (selectedStyle === "minimal" ? 100 : startShape.width);
+        const startY =
+          start.y + (selectedStyle === "minimal" ? 30 : startShape.height / 2);
         const endX = end.x;
-        const endY = end.y + (selectedStyle === "minimal" ? 30 : endShape.height / 2);
+        const endY =
+          end.y + (selectedStyle === "minimal" ? 30 : endShape.height / 2);
 
         return (
           <path
             key={`connection-${layer.id}-${nextLayer.id}`}
-            d={`M ${startX} ${startY} C ${startX + 40} ${startY}, ${endX - 40} ${endY}, ${endX} ${endY}`}
+            d={`M ${startX} ${startY} C ${startX + 40} ${startY}, ${
+              endX - 40
+            } ${endY}, ${endX} ${endY}`}
             stroke="#94A3B8"
             strokeWidth="2"
             fill="none"
@@ -93,12 +100,16 @@ export default function Canvas({ layers, selectedStyle }) {
         ? 6
         : Math.min(parseInt(nextLayer.parameters.units) || 1, 10);
       const circleGap = 20; // Vertical spacing between nodes
-      
+
       // Calculate vertical center offsets for both layers
-      const startTotalHeight = isFirstLong ? (6 * circleGap) : (startUnits * circleGap);
-      const endTotalHeight = isSecondLong ? (6 * circleGap) : (endUnits * circleGap);
+      const startTotalHeight = isFirstLong
+        ? 6 * circleGap
+        : startUnits * circleGap;
+      const endTotalHeight = isSecondLong
+        ? 6 * circleGap
+        : endUnits * circleGap;
       const startY = start.y + 20; // Add padding from top
-      const endY = end.y + 20;   // Add padding from top
+      const endY = end.y + 20; // Add padding from top
 
       // Create connections between each node in both layers
       return Array.from({ length: startUnits })
@@ -109,46 +120,46 @@ export default function Canvas({ layers, selectedStyle }) {
             if (!isFirstLong && !isSecondLong) {
               // Both layers are short
               x1 = start.x + 50; // Align with circle centers
-              y1 = startY + i * circleGap;
+              y1 = startY + i * circleGap - 6;
               x2 = end.x + 50;
-              y2 = endY + j * circleGap;
+              y2 = endY + j * circleGap - 6;
             } else if (isFirstLong && !isSecondLong) {
               // First layer is long
               if (i < 3) {
                 x1 = start.x + 50;
-                y1 = startY + i * circleGap;
+                y1 = startY + i * circleGap - 6;
               } else {
                 x1 = start.x + 50;
-                y1 = startY + i * circleGap + 3 * 10 + 3 * 2;
+                y1 = startY + i * circleGap + 3 * 10 + 3 * 2 - 6;
               }
               x2 = end.x + 50;
-              y2 = endY + j * circleGap;
+              y2 = endY + j * circleGap - 6;
             } else if (!isFirstLong && isSecondLong) {
               // Second layer is long
               x1 = start.x + 50;
-              y1 = startY + i * circleGap; // First layer y depends on i
+              y1 = startY + i * circleGap - 6; // First layer y depends on i
               if (j < 3) {
                 x2 = end.x + 50;
-                y2 = endY + j * circleGap; // Second layer y depends on j
+                y2 = endY + j * circleGap - 6; // Second layer y depends on j
               } else {
                 x2 = end.x + 50;
-                y2 = endY + j * circleGap + 3 * 10 + 3; // Keep gap pattern consistent
+                y2 = endY + j * circleGap + 3 * 10 + 3 - 6; // Keep gap pattern consistent
               }
             } else {
               // Both layers are long
               if (i < 3) {
                 x1 = start.x + 50;
-                y1 = startY + i * circleGap;
+                y1 = startY + i * circleGap - 6;
               } else {
                 x1 = start.x + 50;
-                y1 = startY + i * circleGap + 3 * 10 + 3;
+                y1 = startY + i * circleGap + 3 * 10 + 3 - 6;
               }
               if (j < 3) {
                 x2 = end.x + 50;
-                y2 = endY + j * circleGap;
+                y2 = endY + j * circleGap - 6;
               } else {
                 x2 = end.x + 50;
-                y2 = endY + j * circleGap + 3 * 10 + 3;
+                y2 = endY + j * circleGap + 3 * 10 + 3 - 6;
               }
             }
 

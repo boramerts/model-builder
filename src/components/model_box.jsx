@@ -4,7 +4,7 @@ import LayerPicker from "./layer_picker";
 import { layerConfigs, DEFAULT_LAYER } from "../config/layer_configs";
 import ParameterSelector from "./parameter_selector";
 
-export default function ModelBox({ layerNumber, id, onDelete, updateLayer }) {
+export default function ModelBox({ layerNumber, id, onDelete, updateLayer, dragHandleProps }) {
   const [selectedLayer, setSelectedLayer] = useState(DEFAULT_LAYER);
   const [parameters, setParameters] = useState(() => {
     // Initialize parameters with defaults
@@ -47,7 +47,8 @@ export default function ModelBox({ layerNumber, id, onDelete, updateLayer }) {
 
   return (
     <div className="w-60 h-full bg-black flex flex-col rounded-3xl border-2 border-gray-300 overflow-hidden flex-shrink-0">
-      <div className="space-y-4 px-4 py-4">
+      <div className="space-y-4 px-4 py-2 flex flex-col items-center">
+        <div className="w-10 h-2 bg-gray-500 rounded-md cursor-pointer"  {...dragHandleProps}></div>
         <LayerPicker
           label={`Layer ${layerNumber}`}
           options={Object.keys(layerConfigs)}

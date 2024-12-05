@@ -2,7 +2,7 @@ import React from "react";
 
 export default function LayerPicker({ label, options, onSelect, value, onDelete }) {
   return (
-    <div className="w-full flex flex-col items-start space-y-1 group">
+    <div className="w-full flex flex-col items-start group">
       <div className="w-full flex justify-between items-center">
         <span className="text-white font-medium flex-grow">{label}</span>
         <button 
