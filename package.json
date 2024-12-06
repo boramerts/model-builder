@@ -2,11 +2,13 @@
   "name": "model-builder",
   "version": "1.0.0",
   "description": "A website that allows you to easily create deep learning model diagrams.",
-  "main": "index.js",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "serve": "vite preview"
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
+    "preview": "vite preview"
   },
   "repository": {
     "type": "git",
@@ -17,10 +19,13 @@
   "bugs": {
     "url": "https://github.com/boramerts/model-builder/issues"
   },
-  "homepage": "https://github.com/boramerts/model-builder#readme",
+  "homepage": "https://boramerts.github.io/model-builder/",
+  "private": false,
   "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "concurrently": "^8.2.2",
+    "gh-pages": "^6.2.0",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.15",
     "vite": "^5.4.11"
@@ -32,8 +37,8 @@
     "@emotion/styled": "^11.13.5",
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.1.5",
-    "@mui/icons-material": "^6.1.8",
-    "@mui/material": "^6.1.8",
+    "@mui/icons-material": "^5.15.0",
+    "@mui/material": "^5.15.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-map-interaction": "^2.1.0",
