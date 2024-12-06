@@ -15,6 +15,7 @@ import FileIcon from "@mui/icons-material/NoteAddOutlined";
 import SaveIcon from "@mui/icons-material/SaveOutlined";
 import ExportIcon from "@mui/icons-material/FileDownloadOutlined";
 import AddIcon from "@mui/icons-material/AddCircleOutline";
+import FileUploadIcon from "@mui/icons-material/UploadFileOutlined";
 
 const App = () => {
   const [modelBoxes, setModelBoxes] = React.useState([]);
@@ -95,7 +96,7 @@ const App = () => {
     // Get SVG content bounds
     const bbox = svgElement.getBBox();
     const padding = 50;
-    const scaleFactor = 3; // Increase resolution by 5x
+    const scaleFactor = 3; // Increase resolution by 3x
 
     // Create copy with proper dimensions
     const svgCopy = svgElement.cloneNode(true);
@@ -117,11 +118,8 @@ const App = () => {
       const svgString = new XMLSerializer().serializeToString(svgCopy);
       const img = new Image();
       
-      // Set canvas size with scale factor for higher resolution
       canvas.width = width * scaleFactor;
       canvas.height = height * scaleFactor;
-      
-      // Scale the context to match the increased size
       ctx.scale(scaleFactor, scaleFactor);
       
       const blob = new Blob([svgString], {type: 'image/svg+xml;charset=utf-8'});
@@ -129,11 +127,9 @@ const App = () => {
       
       img.onload = () => {
         ctx.drawImage(img, 0, 0, width, height);
-        
         canvas.toBlob((blob) => {
           downloadFile(blob, `model_diagram.${format}`);
-        }, `image/${format}`, 1.0); // Add quality parameter for JPEG
-        
+        }, `image/${format}`);
         URL.revokeObjectURL(url);
       };
       
@@ -156,6 +152,45 @@ const App = () => {
 
   const handleExportClick = () => {
     setShowExportDialog(true);
+  };
+
+  const handleSave = () => {
+    const modelData = {
+      layers,
+      style: selectedStyle
+    };
+    
+    const blob = new Blob([JSON.stringify(modelData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'model_config.json';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleLoad = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const modelData = JSON.parse(e.target.result);
+        if (modelData.layers && modelData.style) {
+          setLayers(modelData.layers);
+          setModelBoxes(modelData.layers.map(layer => layer.id));
+          setSelectedStyle(modelData.style);
+        }
+      } catch (error) {
+        console.error('Error parsing file:', error);
+        alert('Invalid model configuration file');
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = ''; // Reset file input
   };
 
   return (
@@ -196,21 +231,38 @@ const App = () => {
                   </div>
 
                   <div className="w-1/2 h-20 flex flex-row items-center justify-end p-5 space-x-3">
-                  <button className="px-4 py-3 bg-gray-200 rounded-xl hover:bg-gray-500 space-x-2 flex flex-row">
-                    <FileIcon></FileIcon>
-                    <p>New</p>
-                  </button>
-                  <button className="px-4 py-3 bg-gray-200 rounded-xl hover:bg-gray-500 space-x-2 flex flex-row">
-                    <SaveIcon></SaveIcon>
-                    <p>Save</p>
-                  </button>
-                  <button 
-                    className="px-4 py-3 bg-gray-200 rounded-xl hover:bg-gray-500 space-x-2 flex flex-row"
-                    onClick={handleExportClick}
-                  >
-                    <ExportIcon></ExportIcon>
-                    <p>Export</p>
-                  </button>
+                    <button className="px-4 py-3 bg-gray-200 rounded-xl hover:bg-gray-500 space-x-2 flex flex-row">
+                      <FileIcon></FileIcon>
+                      <p>New</p>
+                    </button>
+                    <input
+                      type="file"
+                      id="load-file"
+                      accept=".json"
+                      className="hidden"
+                      onChange={handleLoad}
+                    />
+                    <button 
+                      onClick={() => document.getElementById('load-file').click()}
+                      className="px-4 py-3 bg-gray-200 rounded-xl hover:bg-gray-500 space-x-2 flex flex-row"
+                    >
+                      <FileUploadIcon />
+                      <p>Load</p>
+                    </button>
+                    <button 
+                      onClick={handleSave}
+                      className="px-4 py-3 bg-gray-200 rounded-xl hover:bg-gray-500 space-x-2 flex flex-row"
+                    >
+                      <SaveIcon></SaveIcon>
+                      <p>Save</p>
+                    </button>
+                    <button 
+                      className="px-4 py-3 bg-gray-200 rounded-xl hover:bg-gray-500 space-x-2 flex flex-row"
+                      onClick={handleExportClick}
+                    >
+                      <ExportIcon></ExportIcon>
+                      <p>Export</p>
+                    </button>
                   </div>
                 </div>
                 <button 

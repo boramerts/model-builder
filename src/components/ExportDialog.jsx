@@ -1,11 +1,9 @@
-
 import React from 'react';
 
 export default function ExportDialog({ onClose, onExport }) {
   const formats = [
     { id: 'svg', label: 'SVG Vector Image (.svg)' },
-    { id: 'png', label: 'PNG Image (.png)' },
-    { id: 'jpeg', label: 'JPEG Image (.jpg)' }
+    { id: 'png', label: 'PNG Image (.png)' }
   ];
 
   return (
