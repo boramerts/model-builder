@@ -10,6 +10,7 @@ import { SortableContext, horizontalListSortingStrategy, arrayMove } from '@dnd-
 import SortableModelBox from './components/SortableModelBox';
 import { DEFAULT_LAYER } from './config/layer_configs';
 import ExportDialog from './components/ExportDialog';
+import NewDialog from "./components/NewDialog.jsx";
 
 import FileIcon from "@mui/icons-material/NoteAddOutlined";
 import SaveIcon from "@mui/icons-material/SaveOutlined";
@@ -26,6 +27,7 @@ const App = () => {
     translation: { x: 200, y: 50 }
   });
   const [showExportDialog, setShowExportDialog] = React.useState(false);
+  const [showNewDialog, setShowNewDialog] = React.useState(false);
 
   const addModelBox = () => {
     const newId = Date.now();
@@ -193,6 +195,16 @@ const App = () => {
     event.target.value = ''; // Reset file input
   };
 
+  const handleNewClick = () => {
+    setShowNewDialog(true);
+  };
+
+  const handleNew = () => {
+    setModelBoxes([]);
+    setLayers([]);
+    setShowNewDialog(false);
+  };
+
   return (
     <div className="relative min-h-screen">
       {/* Canvas container with pointer events enabled */}
@@ -231,7 +243,9 @@ const App = () => {
                   </div>
 
                   <div className="w-1/2 h-20 flex flex-row items-center justify-end p-5 space-x-3">
-                    <button className="px-4 py-3 bg-gray-200 rounded-xl hover:bg-gray-500 space-x-2 flex flex-row">
+                    <button className="px-4 py-3 bg-gray-200 rounded-xl hover:bg-gray-500 space-x-2 flex flex-row"
+                      onClick={handleNewClick}  
+                    >
                       <FileIcon></FileIcon>
                       <p>New</p>
                     </button>
@@ -275,31 +289,46 @@ const App = () => {
                 
                 {/* Bottom controls - enable pointer events */}
           <div className="pointer-events-auto">
-            <div className="flex flex-row space-x-4 w-full h-64 bg-gray-300/90 backdrop-blur rounded-4xl border-2 border-gray-400 p-5 overflow-x-auto scrollbar-none">
-              <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                <SortableContext items={modelBoxes} strategy={horizontalListSortingStrategy}>
-                  {modelBoxes.map((id, index) => (
-                    <SortableModelBox
-                      key={id}
-                      id={id}
-                      layerNumber={index + 1}
-                      onDelete={() => deleteModelBox(id)}
-                      updateLayer={updateLayer}
-                    />
-                  ))}
-                </SortableContext>
-              </DndContext>
-              <button
-                onClick={addModelBox}
-                className="aspect-square h-full bg-white rounded-3xl border-2 border-gray-300 hover:bg-gray-100 flex flex-col items-center justify-center space-y-4"
-              >
-                <h2 className="font-medium text-xl text-gray-500">Add Layer</h2>
-                <AddIcon sx={{ fontSize: 40, color: "#9CA3AF" }} />
-              </button>
+            <div className="w-full h-64 bg-gray-300/90 backdrop-blur rounded-4xl border-2 border-gray-400 p-5 flex flex-row justify-between space-x-4">
+              {/* Scrollable container for model boxes */}
+              <div className="flex-1 overflow-x-auto scrollbar-none">
+                <div className="flex flex-row space-x-4 min-w-fit">
+                  <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                    <SortableContext items={modelBoxes} strategy={horizontalListSortingStrategy}>
+                      {modelBoxes.map((id, index) => (
+                        <SortableModelBox
+                          key={id}
+                          id={id}
+                          layerNumber={index + 1}
+                          onDelete={() => deleteModelBox(id)}
+                          updateLayer={updateLayer}
+                        />
+                      ))}
+                    </SortableContext>
+                  </DndContext>
+                </div>
+              </div>
+              
+              {/* Add Layer button - always visible */}
+              <div className="flex-shrink-0">
+                <button
+                  onClick={addModelBox}
+                  className="aspect-square h-full bg-white rounded-3xl border-2 border-gray-300 hover:bg-gray-100 flex flex-col items-center justify-center space-y-4"
+                >
+                  <h2 className="font-medium text-xl text-gray-500">Add Layer</h2>
+                  <AddIcon sx={{ fontSize: 40, color: "#9CA3AF" }} />
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
+      {showNewDialog && (
+        <NewDialog
+          onClose={() => setShowNewDialog(false)}
+          onNew={handleNew}
+        />
+      )}
       {showExportDialog && (
         <ExportDialog
           onClose={() => setShowExportDialog(false)}

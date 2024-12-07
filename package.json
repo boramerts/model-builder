@@ -22,6 +22,7 @@
   "homepage": "https://boramerts.github.io/model-builder/",
   "private": false,
   "devDependencies": {
+    "@babel/core": "^7.26.0",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "concurrently": "^8.2.2",

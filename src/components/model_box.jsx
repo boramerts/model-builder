@@ -46,8 +46,8 @@ export default function ModelBox({ layerNumber, id, onDelete, updateLayer, dragH
   };
 
   return (
-    <div className="w-60 h-full bg-black flex flex-col rounded-3xl border-2 border-gray-300 overflow-hidden flex-shrink-0">
-      <div className="space-y-4 px-4 py-2 flex flex-col items-center">
+    <div className="h-full w-60 bg-black flex flex-col rounded-3xl border-2 border-gray-300 overflow-hidden flex-shrink-0">
+      <div className="space-y-4 px-4 py-2 flex flex-col items-center flex-shrink-0">
         <div className="w-10 h-2 bg-gray-500 rounded-md cursor-pointer"  {...dragHandleProps}></div>
         <LayerPicker
           label={`Layer ${layerNumber}`}
@@ -57,7 +57,7 @@ export default function ModelBox({ layerNumber, id, onDelete, updateLayer, dragH
           onDelete={onDelete}
         />
       </div>
-      <div className="overflow-y-auto flex-col h-full space-y-4 px-4 py-4 bg-white">
+      <div className="flex-1 overflow-y-auto flex-col space-y-4 px-4 py-4 bg-white">
         {layerConfigs[selectedLayer].parameters.map((param) =>
           param.type === "number" ? (
             <CustomPicker
