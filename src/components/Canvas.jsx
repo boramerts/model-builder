@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { MapInteraction } from 'react-map-interaction';
 import { layerShapes } from "../config/shapes";
 
-export default function Canvas({ layers, selectedStyle, position, onPositionChange }) {
+export default function Canvas({ layers, selectedStyle, position, onPositionChange, isDarkMode }) {
   const sortedLayers = useMemo(() => layers, [layers]);
 
   // Helper functions first
@@ -194,6 +194,46 @@ export default function Canvas({ layers, selectedStyle, position, onPositionChan
     });
   };
 
+  // Add function to handle shape rendering with correct theme
+  const renderShape = (layer, x, y, isExport = false) => {
+    const shapeConfig = layerShapes[layer.type];
+    if (!shapeConfig) return null;
+
+    // Always use light mode for exports
+    const effectiveDarkMode = isExport ? false : isDarkMode;
+
+    return shapeConfig.shape(
+      x,
+      y,
+      layer.parameters,
+      false,
+      selectedStyle,
+      effectiveDarkMode
+    );
+  };
+
+  // Modify handleExport to use light mode
+  const svgContent = (isExport = false) => (
+    <svg 
+      className="w-full h-full"
+      viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
+      style={{ pointerEvents: 'auto' }}
+    >
+      {sortedLayers.length > 0 && renderConnections()}
+      {sortedLayers.map((layer, index) => {
+        const { x, y } = calculatePosition(index);
+        return (
+          <g
+            key={`layer-${layer.id}`}
+            dangerouslySetInnerHTML={{
+              __html: renderShape(layer, x, y, isExport),
+            }}
+          />
+        );
+      })}
+    </svg>
+  );
+
   return (
     <div 
       className="w-full h-full relative" 
@@ -223,33 +263,7 @@ export default function Canvas({ layers, selectedStyle, position, onPositionChan
               height: '100%'
             }}
           >
-            <svg 
-              className="w-full h-full bg-white"
-              viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
-              style={{ pointerEvents: 'auto' }} // Ensures SVG receives events
-            >
-              {sortedLayers.length > 0 && renderConnections()}
-              {sortedLayers.map((layer, index) => {
-                const { x, y } = calculatePosition(index);
-                const shapeConfig = layerShapes[layer.type];
-                if (!shapeConfig) return null;
-
-                return (
-                  <g
-                    key={`layer-${layer.id}`}
-                    dangerouslySetInnerHTML={{
-                      __html: shapeConfig.shape(
-                        x,
-                        y,
-                        layer.parameters,
-                        false,
-                        selectedStyle
-                      ),
-                    }}
-                  />
-                );
-              })}
-            </svg>
+            {svgContent(false)} {/* Regular rendering with current theme */}
           </div>
         )}
       </MapInteraction>

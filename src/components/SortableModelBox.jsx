@@ -29,7 +29,7 @@ export default function SortableModelBox(props) {
   // Pass drag handle props separately
   return (
     <div ref={setNodeRef} style={style}>
-      <ModelBox {...props} dragHandleProps={{...attributes, ...listeners}} />
+      <ModelBox {...props} dragHandleProps={{...attributes, ...listeners}} isDarkMode={props.isDarkMode} />
     </div>
   );
 }
