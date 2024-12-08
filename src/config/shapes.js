@@ -5,7 +5,7 @@ export const layerShapes = {
   CNN: {
     width: 120,
     height: 80,
-    shape: (x, y, params = {}, isSelected = false, style = "default", isDarkMode = false) => {
+    shape: (x, y, params = {}, isSelected = false, style = "default", isDarkMode = false, isExport = false) => {
       const styleConfig = stylePresets[style]?.CNN || stylePresets.default.CNN;
       
       // Convert string parameters to numbers
@@ -14,6 +14,9 @@ export const layerShapes = {
       const filters = parseInt(params.filters) || 32;
       const kernelSize = parseInt(params.kernelSize) || 3;
       const stride = parseInt(params.stride) || 1;
+
+      // Determine text color - always black for export, otherwise based on theme
+      const textColor = isExport ? 'black' : (isDarkMode ? 'white' : 'black');
 
       // Return simple rectangle for minimal style
       if (style === "minimal") {
@@ -25,14 +28,14 @@ export const layerShapes = {
               rx="${styleConfig.cornerRadius}"
               fill="${isDarkMode ? '#1F2937' : styleConfig.fill}"
               opacity="${styleConfig.opacity}"
-              stroke="${isSelected ? "white" : (isDarkMode ? '#4B5563' : styleConfig.stroke)}"
+              stroke="${isSelected ? "white" : (isDarkMode ? 'white' : styleConfig.stroke)}"
               stroke-width="${isSelected ? 3 : 1}"
             />
             <text 
               x="50" 
               y="35" 
               text-anchor="middle" 
-              fill="${isDarkMode ? 'white' : 'black'}" 
+              fill="${textColor}" 
               font-size="14"
             >
               CNN
@@ -75,7 +78,7 @@ export const layerShapes = {
             x="${width / 2 + stackOffset * numStacks}" 
             y="${height / 2 + stackOffset * numStacks}" 
             text-anchor="middle" 
-            fill="${isDarkMode ? 'white' : 'black'}" 
+            fill="${textColor}" 
             font-size="14"
           >
             CNN ${filters}x${kernelSize}x${kernelSize}
@@ -87,10 +90,13 @@ export const layerShapes = {
   Dense: {
     width: 100,
     height: 60,
-    shape: (x, y, params = {}, isSelected = false, style = "default", isDarkMode = false) => {
+    shape: (x, y, params = {}, isSelected = false, style = "default", isDarkMode = false, isExport = false) => {
       const styleConfig =
         stylePresets[style]?.Dense || stylePresets.default.Dense;
       const units = parseInt(params.units) || 1;
+
+      // Determine text color - always black for export, otherwise based on theme
+      const textColor = isExport ? 'black' : (isDarkMode ? 'white' : 'black');
 
       // Return simple rectangle for minimal style
       if (style === "minimal") {
@@ -102,14 +108,14 @@ export const layerShapes = {
               rx="${styleConfig.cornerRadius}"
               fill="${isDarkMode ? '#1F2937' : styleConfig.fill}"
               opacity="${styleConfig.opacity}"
-              stroke="${isSelected ? "white" : (isDarkMode ? '#4B5563' : styleConfig.stroke)}"
+              stroke="${isSelected ? "white" : (isDarkMode ? 'white' : styleConfig.stroke)}"
               stroke-width="${isSelected ? 3 : 1}"
             />
             <text 
               x="50" 
               y="35" 
               text-anchor="middle" 
-              fill="${isDarkMode ? 'white' : 'black'}" 
+              fill="${textColor}" 
               font-size="14"
             >
               Dense
@@ -179,7 +185,7 @@ export const layerShapes = {
                   : topStart + units * circleGap + circleSize + 5 // All circles height + padding
               }"
               text-anchor="middle" 
-              fill="${isDarkMode ? 'white' : 'black'}" 
+              fill="${textColor}" 
               font-size="14"
             >
               Dense
@@ -191,9 +197,12 @@ export const layerShapes = {
   LSTM: {
     width: 130,
     height: 70,
-    shape: (x, y, params = {}, isSelected = false, style = "default", isDarkMode = false) => {
+    shape: (x, y, params = {}, isSelected = false, style = "default", isDarkMode = false, isExport = false) => {
       const styleConfig = stylePresets[style]?.LSTM || stylePresets.default.LSTM;
       
+      // Determine text color - always black for export, otherwise based on theme
+      const textColor = isExport ? 'black' : (isDarkMode ? 'white' : 'black');
+
       // For minimal style use standard dimensions
       if (style === "minimal") {
         return `
@@ -204,14 +213,14 @@ export const layerShapes = {
               rx="${styleConfig.cornerRadius}"
               fill="${isDarkMode ? '#1F2937' : styleConfig.fill}"
               opacity="${styleConfig.opacity}"
-              stroke="${isSelected ? "white" : (isDarkMode ? '#4B5563' : styleConfig.stroke)}"
+              stroke="${isSelected ? "white" : (isDarkMode ? 'white' : styleConfig.stroke)}"
               stroke-width="${isSelected ? 3 : 1}"
             />
             <text 
               x="50" 
               y="35" 
               text-anchor="middle"
-              fill="${isDarkMode ? 'white' : 'black'}" 
+              fill="${textColor}" 
               font-size="14"
             >
               LSTM
@@ -235,7 +244,7 @@ export const layerShapes = {
             x="65" 
             y="35" 
             text-anchor="middle"
-            fill="${isDarkMode ? 'white' : 'black'}" 
+            fill="${textColor}" 
             font-size="14"
           >
             LSTM
@@ -247,9 +256,12 @@ export const layerShapes = {
   MaxPooling: {
     width: 110,
     height: 60,
-    shape: (x, y, params = {}, isSelected = false, style = "default", isDarkMode = false) => {
+    shape: (x, y, params = {}, isSelected = false, style = "default", isDarkMode = false, isExport = false) => {
       const styleConfig =
         stylePresets[style]?.MaxPooling || stylePresets.default.MaxPooling;
+
+      // Determine text color - always black for export, otherwise based on theme
+      const textColor = isExport ? 'black' : (isDarkMode ? 'white' : 'black');
 
       return `
         <g transform="translate(${x},${y})">
@@ -259,14 +271,14 @@ export const layerShapes = {
             rx="${styleConfig.cornerRadius}"
             fill="${isDarkMode ? '#1F2937' : styleConfig.fill}"
             opacity="${styleConfig.opacity}"
-            stroke="${isSelected ? "white" : (isDarkMode ? '#4B5563' : styleConfig.stroke)}"
+            stroke="${isSelected ? "white" : (isDarkMode ? 'white' : styleConfig.stroke)}"
             stroke-width="${isSelected ? 3 : 1}"
           />
           <text 
             x="55" 
             y="35" 
             text-anchor="middle"
-            fill="${isDarkMode ? 'white' : 'black'}" 
+            fill="${textColor}" 
             font-size="14"
           >
             MaxPool

@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { MapInteraction } from 'react-map-interaction';
 import { layerShapes } from "../config/shapes";
 
-export default function Canvas({ layers, selectedStyle, position, onPositionChange, isDarkMode }) {
+export default function Canvas({ layers, selectedStyle, position, onPositionChange, isDarkMode, isExport = false }) {
   const sortedLayers = useMemo(() => layers, [layers]);
 
   // Helper functions first
@@ -199,20 +199,18 @@ export default function Canvas({ layers, selectedStyle, position, onPositionChan
     const shapeConfig = layerShapes[layer.type];
     if (!shapeConfig) return null;
 
-    // Always use light mode for exports
-    const effectiveDarkMode = isExport ? false : isDarkMode;
-
     return shapeConfig.shape(
       x,
       y,
       layer.parameters,
       false,
       selectedStyle,
-      effectiveDarkMode
+      isDarkMode,
+      isExport  // Pass isExport parameter
     );
   };
 
-  // Modify handleExport to use light mode
+  // Modify svgContent to handle export properly
   const svgContent = (isExport = false) => (
     <svg 
       className="w-full h-full"
@@ -222,6 +220,7 @@ export default function Canvas({ layers, selectedStyle, position, onPositionChan
       {sortedLayers.length > 0 && renderConnections()}
       {sortedLayers.map((layer, index) => {
         const { x, y } = calculatePosition(index);
+        // Pass isExport to renderShape
         return (
           <g
             key={`layer-${layer.id}`}
@@ -263,7 +262,7 @@ export default function Canvas({ layers, selectedStyle, position, onPositionChan
               height: '100%'
             }}
           >
-            {svgContent(false)} {/* Regular rendering with current theme */}
+            {svgContent(isExport)}  {/* Pass isExport here */}
           </div>
         )}
       </MapInteraction>

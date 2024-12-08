@@ -105,8 +105,30 @@ const App = () => {
   };
 
   const handleExport = async (format) => {
-    const svgElement = document.querySelector("svg");
-    if (!svgElement) return;
+    // Create a temporary div for export
+    const tempDiv = document.createElement('div');
+    document.body.appendChild(tempDiv);
+
+    // Render Canvas in export mode
+    ReactDOM.createRoot(tempDiv).render(
+      <Canvas
+        layers={layers}
+        selectedStyle={selectedStyle}
+        position={canvasPosition}
+        onPositionChange={() => {}}
+        isDarkMode={false}  // Force light mode for export
+        isExport={true}     // Enable export mode
+      />
+    );
+
+    // Wait for render
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    const svgElement = tempDiv.querySelector("svg");
+    if (!svgElement) {
+      tempDiv.remove();
+      return;
+    }
 
     // Get SVG content bounds
     const bbox = svgElement.getBBox();
@@ -155,6 +177,9 @@ const App = () => {
 
       img.src = url;
     }
+
+    // Cleanup
+    tempDiv.remove();
 
     setShowExportDialog(false);
   };
