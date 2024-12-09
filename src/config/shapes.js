@@ -3,19 +3,29 @@ import { stylePresets } from "./style_presets";
 
 export const layerShapes = {
   CNN: {
-    width: 120,
-    height: 80,
+    width: 120, // This will be overridden by dynamic calculation
+    height: 80, // This will be overridden by dynamic calculation
     shape: (x, y, params = {}, isSelected = false, style = "default", isDarkMode = false, isExport = false) => {
       const styleConfig = stylePresets[style]?.CNN || stylePresets.default.CNN;
       
       // Convert string parameters to numbers
-      const width = parseInt(params.width) || 50;
-      const height = parseInt(params.height) || 50;
       const filters = parseInt(params.filters) || 32;
       const kernelSize = parseInt(params.kernelSize) || 3;
       const stride = parseInt(params.stride) || 1;
 
-      // Determine text color - always black for export, otherwise based on theme
+      // Dynamic dimensions based on filters
+      const baseWidth = 50;
+      const baseHeight = 50;
+      const stackOffset = 8;
+      
+      // Calculate number of visible stacks (max 5 stacks)
+      const numStacks = Math.min(Math.max(Math.ceil(filters / 5), 2), 5);
+      
+      // Calculate dynamic width and height including stacks
+      const totalWidth = baseWidth + (numStacks * stackOffset);
+      const totalHeight = baseHeight + (numStacks * stackOffset);
+
+      // Determine text color
       const textColor = isExport ? 'black' : (isDarkMode ? 'white' : 'black');
 
       // Return simple rectangle for minimal style
@@ -44,9 +54,6 @@ export const layerShapes = {
         `;
       }
 
-      const stackOffset = 8;
-      const numStacks = Math.max(filters, 1); // Limit visual stacks to 5
-
       // Only calculate dynamic opacity for default style
       const getOpacity = (index) => {
         if (style === "default") {
@@ -61,11 +68,11 @@ export const layerShapes = {
         <rect 
           x="${i * stackOffset}" 
           y="${i * stackOffset}" 
-          width="${width}" 
-          height="${height}"
+          width="${baseWidth}" 
+          height="${baseHeight}"
           rx="${styleConfig.cornerRadius}"
           fill="${styleConfig.fill}"
-          opacity= ${getOpacity(i)}
+          opacity=${getOpacity(i)}
           stroke="${isSelected ? "white" : styleConfig.stroke}"
           stroke-width="${isSelected ? 3 : 1}"
         />`
@@ -75,8 +82,8 @@ export const layerShapes = {
         <g transform="translate(${x},${y})">
           ${rectangles}
           <text 
-            x="${width / 2 + stackOffset * numStacks}" 
-            y="${height / 2 + stackOffset * numStacks}" 
+            x="${baseWidth / 2 + stackOffset * (numStacks - 1)}" 
+            y="${baseHeight / 2 + stackOffset * (numStacks - 1)}" 
             text-anchor="middle" 
             fill="${textColor}" 
             font-size="14"

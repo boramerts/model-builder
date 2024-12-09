@@ -10,12 +10,12 @@ export default function CustomPicker({ text, onNumberChange, value, isDarkMode }
             </span>
             <div className="flex items-center">
                 <button
-                    className={`px-2 rounded-l-md border-2 ${
+                    className={`h-[38px] px-2 rounded-l-md border-2 ${
                         isDarkMode 
                             ? 'bg-gray-700 text-white border-gray-600 hover:bg-gray-600' 
                             : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
                     }`}
-                    onClick={() => onNumberChange(Number(value) - 1)}
+                    onClick={() => onNumberChange(Math.max(1, Number(value) - 1))}
                 >
                     -
                 </button>
@@ -32,7 +32,7 @@ export default function CustomPicker({ text, onNumberChange, value, isDarkMode }
                     onWheel={(e) => e.target.blur()}
                 />
                 <button
-                    className={`px-2 rounded-r-md border-2 ${
+                    className={`h-[38px] px-2 rounded-r-md border-2 ${
                         isDarkMode 
                             ? 'bg-gray-700 text-white border-gray-600 hover:bg-gray-600' 
                             : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'

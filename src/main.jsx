@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import Dropdown from "./components/dropdown";
 import ModelBox from "./components/model_box.jsx";
@@ -33,7 +33,20 @@ const App = () => {
   });
   const [showExportDialog, setShowExportDialog] = React.useState(false);
   const [showNewDialog, setShowNewDialog] = React.useState(false);
-  const [isDarkMode, setIsDarkMode] = React.useState(false);
+  const [isDarkMode, setIsDarkMode] = React.useState(
+    window.matchMedia('(prefers-color-scheme: dark)').matches
+  );
+
+  useEffect(() => { // Automatically detect user color scheme
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e) => setIsDarkMode(e.matches);
+    
+    // Add listener
+    mediaQuery.addEventListener('change', handleChange);
+    
+    // Cleanup
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
 
   const addModelBox = () => {
     const newId = Date.now();

@@ -49,7 +49,7 @@ export default function Canvas({ layers, selectedStyle, position, onPositionChan
   // Helper function to calculate x,y coordinates for each layer
   const calculatePosition = (index) => {
     const startX = 100; // Initial X offset from left
-    const centerY = dimensions.height / 2; // Vertical center position
+    const centerY = dimensions.height * 0.4; // Vertical center position
     const spacing = 150; // Horizontal spacing between layers
 
     const layer = sortedLayers[index];
@@ -76,18 +76,16 @@ export default function Canvas({ layers, selectedStyle, position, onPositionChan
 
       if (!startShape || !endShape) return null;
 
-      // For minimal style or non-Dense layers, use simple connections
+      // For minimal style or when either layer is not Dense
       if (
         selectedStyle === "minimal" ||
         !(layer.type === "Dense" && nextLayer.type === "Dense")
       ) {
-        const startX =
-          start.x + (selectedStyle === "minimal" ? 100 : startShape.width);
-        const startY =
-          start.y + (selectedStyle === "minimal" ? 30 : startShape.height / 2);
+        // Calculate middle points for both layers
+        const startX = start.x + (selectedStyle === "minimal" ? 100 : startShape.width);
+        const startY = start.y + (getLayerHeight(layer) / 2);
         const endX = end.x;
-        const endY =
-          end.y + (selectedStyle === "minimal" ? 30 : endShape.height / 2);
+        const endY = end.y + (getLayerHeight(nextLayer) / 2);
 
         return (
           <path
@@ -102,7 +100,7 @@ export default function Canvas({ layers, selectedStyle, position, onPositionChan
         );
       }
 
-      // Dense-to-Dense connections for non-minimal style
+      // Dense-to-Dense connections remain unchanged
       let isFirstLong = layer.parameters.units > 10;
       let isSecondLong = nextLayer.parameters.units > 10;
       let startUnits = isFirstLong
